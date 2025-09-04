@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .profile-section {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Welcome, {{ professional.username }}!</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/professional/dashboard/search">Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="alert-container mb-3">
+      {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+<div class="container">
+    <div class="profile-section">
+        <h4>Profile Information</h4>
+        <p><strong>Address:</strong> {{ professional.user_address }}</p>
+        <p><strong>Postal Code:</strong> {{ professional.postal_code }}</p>
+        <p><strong>Rating:</strong> {{ professional.average_rating }}</p>
+        <p><strong>Experience Level:</strong> {{ professional.professional_experience_level }}</p>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
+    </div>
+   <h4>Service Requests</h4>
+   <table class="table table-striped">
+       <thead>
+           <tr>
+               <th>Request ID</th>
+               <th>Service</th>
+               <th>Customer</th>
+               <th>Request Date</th>
+               <th>Status</th>
+               <th>Actions</th>
+           </tr>
+       </thead>
+       <tbody>
+           {% for request in pending_requests %}
+           <tr>
+               <td>{{ request.id }}</td>
+               <td>{{ request.service.service_title if request.service else "N/A" }}</td>
+               <td>{{ request.customer.username if request.customer else "N/A" }}</td>
+               <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+               <td>{{ request.request_status | capitalize }}</td>
+               <td>
+                   <form method="POST" action="/professional/request/{{ request.id }}/accept" style="display: inline;">
+                       <button class="btn btn-success btn-sm" type="submit">Accept</button>
+                   </form>
+                   <form method="POST" action="/professional/request/{{ request.id }}/reject" style="display: inline;">
+                       <button class="btn btn-danger btn-sm" type="submit">Reject</button>
+                   </form>
+               </td>
+           </tr>
+           {% endfor %}
+       </tbody>
+   </table>
+<h4>Closed Requests</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Request ID</th>
+            <th>Service</th>
+            <th>Customer</th>
+            <th>Completion Date</th>
+            <th>Rating</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for closed in closed_requests %}
+        <tr>
+            <td>{{ closed.id }}</td>
+            <td>{{ closed.service.service_title }}</td>
+            <td>{{ closed.customer.username }}</td>
+            <td>{{ closed.closed_at.strftime('%Y-%m-%d') if closed.closed_at else "Not available" }}</td>
+            <td>
+                {% if closed.customer_rating > 0 %}
+                {{ closed.customer_rating }}/5
+                {% else %}
+                Not rated
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="/professional/dashboard/edit_profile">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="user_address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="user_address" name="user_address" value="{{ professional.user_address }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="postal_code" class="form-label">Postal Code</label>
+                        <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ professional.postal_code }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="experience_level" class="form-label">Experience Level</label>
+                        <select id="experience_level" name="experience_level" class="form-select" aria-label="Select experience level" required>
+                            <option value="" disabled {% if not professional.professional_experience_level %}selected{% endif %}>-- Choose Experience Level --</option>
+                            <option value="Beginner" {% if professional.professional_experience_level == "Beginner" %}selected{% endif %}>Beginner</option>
+                            <option value="Intermediate" {% if professional.professional_experience_level == "Intermediate" %}selected{% endif %}>Intermediate</option>
+                            <option value="Expert" {% if professional.professional_experience_level == "Expert" %}selected{% endif %}>Expert</option>
+                        </select>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

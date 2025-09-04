@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Services</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            margin-bottom: 30px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-item .nav-link {
+            font-size: 1.1rem;
+            padding: 10px 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Search Services</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customer/dashboard">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/customer/search">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="my-4">Search for Services</h1>
+        <form method="POST">
+            <div class="form-row">
+                <div class="col">
+                    <input type="text" class="form-control" name="service_title" placeholder="Enter service title" value="{{ request.form.get('service_title', '') }}">
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" name="postal_code" placeholder="Enter postal code" value="{{ request.form.get('postal_code', '') }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+
+        <h2 class="my-4">Available Services</h2>
+        <div class="list-group">
+            {% if results %}
+                {% for service in results %}
+                    <div class="list-group-item">
+                        <h4>{{ service.service_title }}</h4>
+                        <p>{{ service.service_details }}</p>
+                        <p><strong>Price:</strong> ${{ service.starting_price }}</p>
+                        {% if service.professionals %}
+                            <strong>Professional:</strong> 
+                            {% for professional in service.professionals %}
+                                <p>{{ professional.username }} (Postal Code: {{ professional.postal_code }})</p>
+                            {% else %}
+                                <p>No professionals available</p>
+                            {% endfor %}
+                        {% else %}
+                            <p>No professionals available</p>
+                        {% endif %}
+                        
+                        <a href="/customer/dashboard/service/{{ service.id }}" class="btn btn-primary">Request Service</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-warning">
+                    No services found matching your search criteria.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('/static/home.png') no-repeat center center/cover;
+            font-family: Arial, sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .registration-card {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .registration-card h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f8f9fa;
+        }
+
+        label {
+            color: #f8f9fa;
+        }
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #217dbb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="registration-card">
+    <h2>Professional Signup</h2>
+    <form method="POST" action="/professional/register" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3">
+            <label for="address" class="form-label">Address</label>
+            <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="postal_code" class="form-label">Postal Code</label>
+            <input type="text" class="form-control" id="postal_code" name="postal_code" required>
+        </div>
+        <div class="mb-3">
+            <label for="professional_experience" class="form-label">Experience Level</label>
+            <select class="form-select" id="professional_experience" name="professional_experience" required>
+                <option value="" disabled selected>Select experience level</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Expert">Expert</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="service" class="form-label">Service</label>
+            <select class="form-select" id="service" name="service" required>
+                <option value="" disabled selected>Select a service</option>
+                {% for service in services %}
+                <option value="{{ service.service_title }}">{{ service.service_title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="professional_file" class="form-label">Upload Document</label>
+            <input type="file" class="form-control" id="professional_file" name="professional_file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+    <div class="text-center mt-3">
+        <p>Already have an account? <a href="/user/login" class="text-white">Login here</a></p>
+    </div>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="alert-container mb-3">
+      {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
